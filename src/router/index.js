@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import LoginPage from '../views/login/LoginPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,12 +23,8 @@ const router = createRouter({
         },
         {
           path: '/Login',
-          component: () => import('@/views/Login/Login.vue'),
+          component: LoginPage,
           children: [
-            {
-              path: '',
-              redirect: 'Inventory'
-            },
             {
               path: 'Inventory',
               component: () => import('@/views/Login/Inventory.vue')

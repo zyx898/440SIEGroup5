@@ -17,7 +17,7 @@
       <nav class="top-nav">
         <div class="left-nav">
           <div class="logo">
-            <img src="logo.png" alt="Logo" />
+            <img src="../logo.png" alt="Logo" />
           </div>
           <ul class="nav-links">
             <li><router-link to="/Gadget/Home">Home</router-link></li>
@@ -32,6 +32,7 @@
     </header>
     <main>
       <router-view></router-view>
+      <el-button></el-button>
     </main>
     <footer>
       <!-- Add banner content here -->
