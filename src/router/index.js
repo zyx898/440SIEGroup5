@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '../views/login/LoginPage.vue'
+import SignUp from '../views/Register/SignUp.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,10 @@ const router = createRouter({
               component: () => import('@/views/Login/Sale.vue')
             }
           ]
+        },
+        {
+          path: '/Register',
+          component: SignUp,
         }
       ]
     }

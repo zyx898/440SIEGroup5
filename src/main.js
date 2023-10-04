@@ -4,6 +4,8 @@ import App from './App.vue'
 
 import router from './router'
 import pinia from './stores/index'
+//import axios from 'axios'
+//import VueAxios from 'vue-axios'
 import '@/assets/main.scss'
 
 const app = createApp(App)
