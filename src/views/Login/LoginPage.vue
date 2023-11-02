@@ -2,6 +2,16 @@
   <div>
     <el-card class="box-card">
       <h2>Login</h2>
+      <div
+        v-if="showDialog"
+        class="dialog"
+        :class="{
+          'success-dialog': dialogType === 'success',
+          'error-dialog': dialogType === 'error'
+        }"
+      >
+        {{ dialogMessage }}
+      </div>
       <el-form
         :model="ruleForm"
         status-icon
@@ -27,9 +37,8 @@
           type="primary"
           @click="submitForm('ruleForm')"
           v-loading="loading"
-          >Username</el-button
+          >Login</el-button
         >
-        <el-button @click="resetForm('ruleForm')">Reset</el-button>
         <router-link to="/register">
           <el-button style="margin-left: 10px">Sign Up</el-button>
         </router-link>
@@ -39,75 +48,107 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
       ruleForm: {
-        uname: "",
-        password: "",
+        uname: '',
+        password: ''
       },
+      showDialog: false,
+      dialogMessage: '',
+      dialogType: 'success', // Can be 'success' or 'error'
       rules: {
         uname: [
-          { required: true, message: "Username can not be empty", trigger: "blur" },
+          {
+            required: true,
+            message: 'Username can not be empty',
+            trigger: 'blur'
+          }
         ],
         password: [
-          { required: true, message: "Password can not be empty", trigger: "blur" },
-        ],
+          {
+            required: true,
+            message: 'Password can not be empty',
+            trigger: 'blur'
+          }
+        ]
       },
-      loading: false, 
-    };
+      loading: false
+    }
   },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
-        this.loading = true;
         if (valid) {
-          let _this = this;
-          // 使用 axios 将登录信息发送到后端
-          this.axios({
-            url: "http://66.11.119.83:8423/login",              
-            method: "post",                       
-            headers: {                            
-              "Content-Type": "application/json",
+          this.loading = true
+          axios({
+            url: 'http://66.11.119.83:8423/login',
+            method: 'post',
+            headers: {
+              'Content-Type': 'application/json'
             },
-            params: {                            
-              uname: _this.ruleForm.uname,
-              password: _this.ruleForm.password,
-            },
-          }).then((res) => { // 当收到后端的响应时执行该括号内的代码，res 为响应信息，也就是后端返回的信息
-            if (res.data.code === "0") {  // 当响应的编码为 0 时，说明登录成功
-              // 将用户信息存储到sessionStorage中
-              sessionStorage.setItem("userInfo", JSON.stringify(res.data.data));
-              // 跳转页面到首页
-              this.$router.push('/home');
-              // 显示后端响应的成功信息
-              this.$message({
-                message: res.data.msg,
-                type: "success",
-              });
-            } else {  // 当响应的编码不为 0 时，说明登录失败
-              // 显示后端响应的失败信息
-              this.$message({
-                message: res.data.msg,
-                type: "warning",
-              });
+            data: {
+              username: this.ruleForm.uname,
+              password: this.ruleForm.password // Assuming this is the correct password field
             }
-            // 不管响应成功还是失败，收到后端响应的消息后就不再让登录按钮显示加载动画了
-            _this.loading = false;
-            console.log(res);
-          });
-        } else {  // 如果账号或密码有一个没填，就直接提示必填，不向后端请求
-          console.log("error submit!!");
-          this.loading = false;
-          return false;
+          })
+            .then((response) => {
+              this.loading = false
+              if (response.status === 200) {
+                //convert response.data to json
+                //store token in local storage
+                // localStorage.setItem('userInfo', JSON.response.data)
+                //store json in local storage
+                console.log(response.data)
+                localStorage.setItem('userInfo', JSON.stringify(response.data))
+                //log out the userInfo
+                //set login to true
+                localStorage.setItem('LogedIn', true)
+
+                this.dialogType = 'success'
+                this.dialogMessage = 'Login successful!'
+                this.showDialog = true
+                setTimeout(() => {
+                  this.showDialog = false // Hide the dialog
+                  this.$router.push('/') // Redirect
+                }, 2000)
+              } else {
+                this.dialogType = 'error'
+                this.dialogMessage =
+                  'Error during Login: ' +
+                  (response.data.msg || 'Unknown error')
+                this.showDialog = true
+                // Optionally hide the dialog after some time
+                setTimeout(() => {
+                  this.showDialog = false
+                }, 2000)
+              }
+            })
+            .catch((error) => {
+              this.loading = false
+              this.dialogType = 'error'
+              this.dialogMessage = 'Error during Login. Please try again.'
+              this.showDialog = true
+              this.resetForm(formName)
+              // Optionally hide the dialog after some time
+              setTimeout(() => {
+                this.showDialog = false
+              }, 2000)
+            })
+        } else {
+          this.loading = false
+          // Handle validation error, set an error message in a similar way
         }
-      });
+      })
     },
     resetForm(formName) {
-      this.$refs[formName].resetFields();
-    },
-  },
-};
+      this.$refs[formName].resetFields()
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -117,5 +158,22 @@ export default {
 }
 .login-from {
   margin: auto auto;
+}
+.dialog {
+  /* styles for your dialog */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  border: 1px solid #ccc;
+  background-color: white;
+  z-index: 1000;
+}
+.success-dialog {
+  border-color: green;
+}
+.error-dialog {
+  border-color: red;
 }
 </style>
